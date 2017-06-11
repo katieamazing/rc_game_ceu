@@ -1,0 +1,181 @@
+#include "sdl/sdl.ceu"
+#include "c.ceu"
+
+native/pos do
+
+  char scratch[80];
+
+end
+
+native/nohold _itoa;
+native/const _scratch;
+
+code/tight Collision (var SDL_Rect r1, var SDL_Rect r2) -> bool
+do
+  if r1.x+r1.w < r2.x then
+    escape false;
+  end
+  if r1.y+r1.h < r2.y then
+    escape false;
+  end
+  if r2.x+r2.w < r1.x then
+    escape false;
+  end
+  if r2.y+ r2.h < r1.y then
+    escape false;
+  end
+  escape true;
+end
+
+
+code/await Green (var& _SDL_Renderer ren, var SDL_Rect rect) -> (var SDL_Rect rct, event void collided) -> void do
+  rct = val SDL_Rect(rect.x, rect.y, 40, 40);
+
+  par/or do
+    await collided;
+  with
+    every SDL_REDRAW do
+        _SDL_SetRenderDrawColor(&&ren, 0x99,0xFF,0x99,0xFF);
+        _SDL_RenderFillRect(&&ren, (&&rect as _SDL_Rect&&));
+    end
+  end
+end
+
+code/await Red (var& _SDL_Renderer ren, var SDL_Rect rect) -> (var SDL_Rect rct, event void collided) -> void do
+  rct = val SDL_Rect(rect.x, rect.y, 40, 40);
+
+  par/or do
+    await collided;
+  with
+    every SDL_REDRAW do
+        _SDL_SetRenderDrawColor(&&ren, 0xFF,0x99,0x99,0xFF);
+        _SDL_RenderFillRect(&&ren, (&&rect as _SDL_Rect&&));
+    end
+  end
+end
+
+var&? SDL_Init sdl =
+    spawn SDL_Init("The Good Ship Testable", 800,480, SDL_Color(0xFF,0xFF,0xFF,0xFF));
+
+
+watching sdl do
+
+  var& SDL_Open_Image img = spawn SDL_Open_Image(&sdl!.ren, "logo-ship.png");
+  var SDL_Rect fg = val SDL_Rect(100,100 , img.tex.width, img.tex.height);
+  var bool right_is_down = false;
+  var bool left_is_down = false;
+  var bool up_is_down = false;
+  var bool down_is_down = false;
+  var int velx = 0;
+  var int vely = 0;
+  var int score = 0;
+
+  par do
+    var _SDL_KeyboardEvent&& key;
+    every key in SDL_KEYDOWN do
+      if key:keysym.sym == _SDLK_RIGHT then
+        right_is_down = true;
+      end
+      if key:keysym.sym == _SDLK_LEFT then
+        left_is_down = true;
+      end
+      if key:keysym.sym == _SDLK_UP then
+        up_is_down = true;
+      end
+      if key:keysym.sym == _SDLK_DOWN then
+        down_is_down = true;
+      end
+    end
+
+  with
+    var _SDL_KeyboardEvent&& key;
+    every key in SDL_KEYUP do
+      if key:keysym.sym == _SDLK_RIGHT then
+        right_is_down = false;
+      end
+      if key:keysym.sym == _SDLK_LEFT then
+        left_is_down = false;
+      end
+      if key:keysym.sym == _SDLK_UP then
+        up_is_down = false;
+      end
+      if key:keysym.sym == _SDLK_DOWN then
+        down_is_down = false;
+      end
+    end
+
+  with
+    every 50ms do
+      if right_is_down then
+        velx = velx + 1;
+      end
+      if left_is_down then
+        velx = velx - 1;
+      end
+      if up_is_down then
+        vely = vely - 1;
+      end
+      if down_is_down then
+        vely = vely + 1;
+      end
+
+      var int new_x = fg.x + velx;
+      var int new_y = fg.y + vely;
+
+      if new_x < 0 then
+        new_x = 0;
+      end
+      if new_x > 800 then
+        new_x = 800;
+      end
+      if new_y < 0 then
+        new_y = 0;
+      end
+      if new_y > 480 then
+        new_y = 480;
+      end
+
+      velx = new_x - fg.x;
+      vely = new_y - fg.y;
+
+      fg.x = new_x;
+      fg.y = new_y;
+
+    end
+
+  with
+    pool[10] Green gs;
+    pool[10] Red rs;
+    par do
+      every 40ms do
+        spawn Green(&sdl!.ren, SDL_Rect(_rand() % 800,_rand() % 480, 40,40)) in gs;
+        spawn Red(&sdl!.ren, SDL_Rect(_rand() % 800,_rand() % 480, 40,40)) in rs;
+      end
+
+    with
+      every SDL_DT do
+        var&? Green green;
+        loop green in gs do
+          if (call Collision(fg, green!.rct)) then
+            emit green!.collided;
+            score = score + 1;
+          end
+        end
+        var&? Red red;
+        loop red in rs do
+          if (call Collision(fg, red!.rct)) then
+            emit red!.collided;
+            score = score - 1;
+          end
+        end
+      end
+    end
+
+  with
+    every SDL_REDRAW do
+      _SDL_RenderCopy(&&sdl!.ren, &&img.tex.tex, null, &&fg as _SDL_Rect&&);
+    end
+  end
+end
+
+escape 0;
