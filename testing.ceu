@@ -254,8 +254,8 @@ var&? SDL_Init sdl =
     spawn SDL_Init("Red/Green Recurse/Center", 800,480, SDL_Color(0xFF,0xFF,0xFF,0xFF));
 
 watching sdl do
-  var& SDL_Open_Image splash_screen = spawn SDL_Open_Image(&sdl!.ren, "splash.png");
-  var& SDL_Open_Image lose_screen = spawn SDL_Open_Image(&sdl!.ren, "lose.png");
+  var& SDL_Open_Image splash_screen = spawn SDL_Open_Image(&sdl.ren, "splash.png");
+  var& SDL_Open_Image lose_screen = spawn SDL_Open_Image(&sdl.ren, "lose.png");
   var& SDL_Open_Sound red_sound = spawn SDL_Open_Sound("tele_tonedown.wav");
   var& SDL_Open_Sound green_sound = spawn SDL_Open_Sound("tele_toneup.wav");
 
@@ -266,11 +266,11 @@ watching sdl do
       await SDL_KEYDOWN;
     with
       every SDL_REDRAW do
-        _SDL_RenderCopy(&&sdl!.ren, &&splash_screen.tex.tex, null, null);
+        _SDL_RenderCopy(&&sdl.ren, &&splash_screen.tex.tex, null, null);
       end
     end
 
-    var&? Score score = spawn Score(&sdl!.ren);
+    var&? Score score = spawn Score(&sdl.ren);
 
     watching score do
       pool[20] Green gs;
@@ -278,42 +278,42 @@ watching sdl do
 
       par do
         every 40ms do
-          spawn Green(&sdl!.ren, SDL_Rect((_rand() % 800) + 800, _rand() % 480, 40,40)) in gs;
-          spawn Red(&sdl!.ren, SDL_Rect((_rand() % 800) + 800, _rand() % 480, 40,40)) in rs;
+          spawn Green(&sdl.ren, SDL_Rect((_rand() % 800) + 800, _rand() % 480, 40,40)) in gs;
+          spawn Red(&sdl.ren, SDL_Rect((_rand() % 800) + 800, _rand() % 480, 40,40)) in rs;
         end
 
       with
-        var&? Ship ship = spawn Ship(&sdl!.ren, 100, 100);
+        var&? Ship ship = spawn Ship(&sdl.ren, 100, 100);
         watching ship do
           pool[] Particle ps;
           every SDL_DT do
             var&? Green green;
             loop green in gs do
-              if (call Collision(ship!.rect, green!.rct)) then
+              if (call Collision(ship.rect, green!.rct)) then
                 emit green!.collided;
-                emit ship!.collided(true);
-                emit score!.collided_green;
+                emit ship.collided(true);
+                emit score.collided_green;
                 _Mix_PlayChannel(-1, &&green_sound.sound, 0);
                 var int i;
                 var int num_particles = _rand() % 25 + 10;
                 loop i in [0->num_particles[ do
                   var int sq = _rand() % 10 + 8;
-                  spawn Particle(&sdl!.ren, SDL_Rect(green!.rct.x+green!.rct.w/2, green!.rct.y+green!.rct.h/2, sq, sq), ship!.velx, ship!.vely, SDL_Color(0x99, 0xFF, 0x99, 0xFF)) in ps;
+                  spawn Particle(&sdl.ren, SDL_Rect(green!.rct.x+green!.rct.w/2, green!.rct.y+green!.rct.h/2, sq, sq), ship.velx, ship.vely, SDL_Color(0x99, 0xFF, 0x99, 0xFF)) in ps;
                 end
               end
             end
             var&? Red red;
             loop red in rs do
-              if (call Collision(ship!.rect, red!.rct)) then
+              if (call Collision(ship.rect, red!.rct)) then
                 emit red!.collided;
-                emit ship!.collided(false);
-                emit score!.collided_red;
+                emit ship.collided(false);
+                emit score.collided_red;
                 _Mix_PlayChannel(-1, &&red_sound.sound, 0);
                 var int i;
                 var int num_particles = _rand() % 25 + 10;
                 loop i in [0->num_particles[ do
                   var int sq = _rand() % 10 + 8;
-                  spawn Particle(&sdl!.ren, SDL_Rect(red!.rct.x+red!.rct.w/2, red!.rct.y+red!.rct.h/2, sq, sq), ship!.velx, ship!.vely, SDL_Color(0xFF, 0x99, 0x99, 0xFF)) in ps;
+                  spawn Particle(&sdl.ren, SDL_Rect(red!.rct.x+red!.rct.w/2, red!.rct.y+red!.rct.h/2, sq, sq), ship.velx, ship.vely, SDL_Color(0xFF, 0x99, 0x99, 0xFF)) in ps;
                 end
               end
             end
@@ -328,7 +328,7 @@ watching sdl do
       await SDL_KEYDOWN;
     with
       every SDL_REDRAW do
-        _SDL_RenderCopy(&&sdl!.ren, &&lose_screen.tex.tex, null, null);
+        _SDL_RenderCopy(&&sdl.ren, &&lose_screen.tex.tex, null, null);
       end
     end
 
