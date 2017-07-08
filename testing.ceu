@@ -207,6 +207,20 @@ code/await Score (void) -> (event void collided_green, event void collided_red) 
         end
         emit GRAPHICS_DRAW_RECT(-195+i*14,185, 10,10);    //*** TODO: GRAPHICS_DRAW_CIRCLE
       end
+
+      //*** draw text
+      do
+        var[4] _char str = _;
+        _snprintf(&&str[0], 4, "%d", recentreds);
+        emit GRAPHICS_SET_COLOR_NAME(COLOR_RED);
+        emit GRAPHICS_DRAW_TEXT(370,220, &&str[0]);
+      end
+      do
+        var[4] _char str = _;
+        _snprintf(&&str[0], 4, "%d", recentgreens);
+        emit GRAPHICS_SET_COLOR_NAME(COLOR_GREEN);
+        emit GRAPHICS_DRAW_TEXT(370,190, &&str[0]);
+      end
     end
   end
 end
@@ -266,6 +280,7 @@ end
 //*** SDL_Init -> WINDOW_SET_TITLE/SET_SIZE
 emit WINDOW_SET_TITLE("Red/Green Recurse/Center");
 emit WINDOW_SET_SIZE(800,480,800,480);
+emit GRAPHICS_SET_FONT("tiny.ttf", 30);
 
 loop do
   // show splash screen
