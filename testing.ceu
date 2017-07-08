@@ -19,7 +19,7 @@ do
 end
 
 //*** "ren" arguments are no longer necessary
-code/await Ship (var int x, var int y) -> (var Rect rect, var int velx, var int vely, event bool collided) -> void do
+code/await Ship (var int x, var int y) -> (var Rect rect, var int velx, var int vely, event bool collided) -> FOREVER do
   rect = val Rect(x, y, 48, 60);      //*** TODO: GRAPHICS_GET_BMP_DIMENSIONS
   var bool is_green = true;
   var bool recently_collided = false;
@@ -270,38 +270,36 @@ loop do
       end
 
     with
-      var&? Ship ship = spawn Ship(-300, 0);
-      watching ship do
-        pool[] Particle ps;
-        every FRAMES_UPDATE do    //*** SDL_DT -> FRAMES_UPDATE
-          var&? Green green;
-          loop green in gs do
-            if (call Collision(ship.rect, green!.rct)) then
-              emit green!.collided;
-              emit ship.collided(true);
-              emit score.collided_green;
-              emit SOUND_PLAY("tele_toneup.wav");   //*** _Mix_PlayChannel -> SOUND_PLAY
-              var int i;
-              var int num_particles = _rand() % 25 + 10;
-              loop i in [0->num_particles[ do
-                var int sq = _rand() % 10 + 8;
-                spawn Particle(Rect(green!.rct.x, green!.rct.y, sq, sq), ship.velx, ship.vely, Color(0x99, 0xFF, 0x99)) in ps;
-              end
+      var& Ship ship = spawn Ship(-300, 0);
+      pool[] Particle ps;
+      every FRAMES_UPDATE do    //*** SDL_DT -> FRAMES_UPDATE
+        var&? Green green;
+        loop green in gs do
+          if (call Collision(ship.rect, green!.rct)) then
+            emit green!.collided;
+            emit ship.collided(true);
+            emit score.collided_green;
+            emit SOUND_PLAY("tele_toneup.wav");   //*** _Mix_PlayChannel -> SOUND_PLAY
+            var int i;
+            var int num_particles = _rand() % 25 + 10;
+            loop i in [0->num_particles[ do
+              var int sq = _rand() % 10 + 8;
+              spawn Particle(Rect(green!.rct.x, green!.rct.y, sq, sq), ship.velx, ship.vely, Color(0x99, 0xFF, 0x99)) in ps;
             end
           end
-          var&? Red red;
-          loop red in rs do
-            if (call Collision(ship.rect, red!.rct)) then
-              emit red!.collided;
-              emit ship.collided(false);
-              emit score.collided_red;
-              emit SOUND_PLAY("tele_tonedown.wav");
-              var int i;
-              var int num_particles = _rand() % 25 + 10;
-              loop i in [0->num_particles[ do
-                var int sq = _rand() % 10 + 8;
-                spawn Particle(Rect(red!.rct.x, red!.rct.y, sq, sq), ship.velx, ship.vely, Color(0xFF, 0x99, 0x99)) in ps;
-              end
+        end
+        var&? Red red;
+        loop red in rs do
+          if (call Collision(ship.rect, red!.rct)) then
+            emit red!.collided;
+            emit ship.collided(false);
+            emit score.collided_red;
+            emit SOUND_PLAY("tele_tonedown.wav");
+            var int i;
+            var int num_particles = _rand() % 25 + 10;
+            loop i in [0->num_particles[ do
+              var int sq = _rand() % 10 + 8;
+              spawn Particle(Rect(red!.rct.x, red!.rct.y, sq, sq), ship.velx, ship.vely, Color(0xFF, 0x99, 0x99)) in ps;
             end
           end
         end
