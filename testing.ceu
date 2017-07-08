@@ -78,7 +78,7 @@ code/await Ship (var int x, var int y) -> (var Rect rect, var int velx, var int 
     end
   with
     every FRAMES_REDRAW do
-      emit GRAPHICS_DRAW_BMP(rect.x,rect.y, "logo-ship.bmp");   //*** pass path directly (currently no cache, possibly very slow)
+      emit GRAPHICS_DRAW_BMP(rect.x,rect.y, "res/logo-ship.bmp");   //*** pass path directly (currently no cache, possibly very slow)
     end
   with
     var bool is_green = await collided;
@@ -89,9 +89,9 @@ code/await Ship (var int x, var int y) -> (var Rect rect, var int velx, var int 
         watching 1s do
           every FRAMES_REDRAW do
             if is_green then
-              emit GRAPHICS_DRAW_BMP(rect.x,rect.y, "logo-green-overlay.bmp");
+              emit GRAPHICS_DRAW_BMP(rect.x,rect.y, "res/logo-green-overlay.bmp");
             else
-              emit GRAPHICS_DRAW_BMP(rect.x,rect.y, "logo-red-overlay.bmp");
+              emit GRAPHICS_DRAW_BMP(rect.x,rect.y, "res/logo-red-overlay.bmp");
             end
           end
         end
@@ -248,7 +248,7 @@ code/await Game (void) -> void do
             emit green!.collided;
             emit ship.collided(true);
             emit score.collided_green;
-            emit SOUND_PLAY("tele_toneup.wav");   //*** _Mix_PlayChannel -> SOUND_PLAY
+            emit SOUND_PLAY("res/tele_toneup.wav");   //*** _Mix_PlayChannel -> SOUND_PLAY
             var int i;
             var int num_particles = _rand() % 25 + 10;
             loop i in [0->num_particles[ do
@@ -263,7 +263,7 @@ code/await Game (void) -> void do
             emit red!.collided;
             emit ship.collided(false);
             emit score.collided_red;
-            emit SOUND_PLAY("tele_tonedown.wav");
+            emit SOUND_PLAY("res/tele_tonedown.wav");
             var int i;
             var int num_particles = _rand() % 25 + 10;
             loop i in [0->num_particles[ do
@@ -284,7 +284,7 @@ emit GRAPHICS_SET_FONT("tiny.ttf", 30);
 
 loop do
   // show splash screen
-  emit GRAPHICS_DRAW_BMP(0,0, "splash.bmp");        //*** (0,0) is the screen center, x grows to left, y grows to top
+  emit GRAPHICS_DRAW_BMP(0,0, "res/splash.bmp");        //*** (0,0) is the screen center, x grows to left, y grows to top
   await KEY_PRESS;
 
   // show game
@@ -294,7 +294,7 @@ loop do
 
   // show lose screen
   emit FRAMES_SET(no);                      // switch to immediate mode
-  emit GRAPHICS_DRAW_BMP(0,0, "lose.bmp");
+  emit GRAPHICS_DRAW_BMP(0,0, "res/lose.bmp");
   await 1s;
   await KEY_PRESS;
 end   // loop
