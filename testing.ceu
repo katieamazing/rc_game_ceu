@@ -174,7 +174,7 @@ code/await Score (void) -> (event void collided_green, event void collided_red) 
   var int recentgreens = 0;
   var int recentreds = 0;
 
-  par do
+  par/or do
     every collided_green do
       recentgreens = recentgreens + 1;
     end
