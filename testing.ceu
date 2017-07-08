@@ -31,16 +31,13 @@ end
 //*** "ren" arguments are no longer necessary
 code/await Ship (var int x, var int y) -> (var Rect rect, var int velx, var int vely, event bool collided) -> NEVER do
   rect = val Rect(x, y, 48, 60);      //*** TODO: GRAPHICS_GET_BMP_DIMENSIONS
-  var bool is_green = true;
-  var bool recently_collided = false;
+  velx = 0;
+  vely = 0;
 
   var& Key_Is_Down right = spawn Key_Is_Down(KEY_RIGHT);
   var& Key_Is_Down left  = spawn Key_Is_Down(KEY_LEFT);
   var& Key_Is_Down up    = spawn Key_Is_Down(KEY_UP);
   var& Key_Is_Down down  = spawn Key_Is_Down(KEY_DOWN);
-
-  velx = 0;
-  vely = 0;
 
   par do
     every 50ms do
@@ -78,33 +75,27 @@ code/await Ship (var int x, var int y) -> (var Rect rect, var int velx, var int 
 
       rect.x = new_x;
       rect.y = new_y;
-
     end
   with
     every FRAMES_REDRAW do
       emit GRAPHICS_DRAW_BMP(rect.x,rect.y, "logo-ship.bmp");   //*** pass path directly (currently no cache, possibly very slow)
-      if recently_collided then
-        if is_green then
-          emit GRAPHICS_DRAW_BMP(rect.x,rect.y, "logo-green-overlay.bmp");
-        else
-          emit GRAPHICS_DRAW_BMP(rect.x,rect.y, "logo-red-overlay.bmp");
-        end
-      end
     end
   with
+    var bool is_green = await collided;
     loop do
-      if recently_collided then
-        //
-      else
-        is_green = await collided;
-        recently_collided = true;
-      end
       par/or do
         is_green = await collided;
-        recently_collided = true;
       with
-        await 1s;
-        recently_collided = false;
+        watching 1s do
+          every FRAMES_REDRAW do
+            if is_green then
+              emit GRAPHICS_DRAW_BMP(rect.x,rect.y, "logo-green-overlay.bmp");
+            else
+              emit GRAPHICS_DRAW_BMP(rect.x,rect.y, "logo-red-overlay.bmp");
+            end
+          end
+        end
+        await FOREVER;
       end
     end
   end
