@@ -165,7 +165,7 @@ code/await Particle (var Rect rect, var int ship_velx, var int ship_vely, var Co
   with
     every FRAMES_REDRAW do
       emit GRAPHICS_SET_COLOR_RGB(c.r, c.g, c.b);
-      emit GRAPHICS_DRAW_RECT(rect.x,rect.y, rect.w,rect.h);    //*** TODO: GRAPHICS_DRAW_CIRCLE
+      emit GRAPHICS_DRAW_RECT(rect.x,rect.y, rect.w,rect.h);
     end
   end
 end
@@ -205,7 +205,7 @@ code/await Score (void) -> (event void collided_green, event void collided_red) 
         else
           emit GRAPHICS_SET_COLOR_NAME(COLOR_GRAY);
         end
-        emit GRAPHICS_DRAW_RECT(-195+i*14,185, 10,10);
+        emit GRAPHICS_DRAW_RECT(-195+i*14,185, 10,10);    //*** TODO: GRAPHICS_DRAW_CIRCLE
       end
     end
   end
