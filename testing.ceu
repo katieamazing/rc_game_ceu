@@ -132,40 +132,40 @@ code/await Ship (var int x, var int y) -> (var Rect rect, var int velx, var int 
   end
 end
 
-code/await Test_Case (var Rect rect, var Color c) -> (var Rect rct, event void collided) -> void do
-  rct = val Rect(rect.x, rect.y, _rand() % 2 * 40 + 40, 40);
+code/await Test_Case (var Point pst, var Color c) -> (var Rect rect, event void collided) -> void do
+  rect = val Rect(pst.x, pst.y, _rand() % 2 * 40 + 40, 40);
   var int speed = _rand() % 4 + 4;
 
   par/or do
     await collided;
   with
     every 50ms do
-      rct.x = rct.x - speed;
-      if rct.x < -420 then
+      rect.x = rect.x - speed;
+      if rect.x < -420 then
         break;
       end
     end
   with
     every FRAMES_REDRAW do
-        emit GRAPHICS_SET_COLOR_RGB(c.r,c.g,c.b);           //*** SDL_SetRenderDrawColor -> GRAPHICS_SET_COLOR_RGB
-        emit GRAPHICS_DRAW_RECT(rct.x,rct.y, rct.w,rct.h);  //*** SDL_RenderFillRect -> GRAPHICS_DRAW_RECT
+        emit GRAPHICS_SET_COLOR_RGB(c.r,c.g,c.b);               //*** SDL_SetRenderDrawColor -> GRAPHICS_SET_COLOR_RGB
+        emit GRAPHICS_DRAW_RECT(rect.x,rect.y, rect.w,rect.h);  //*** SDL_RenderFillRect -> GRAPHICS_DRAW_RECT
     end
   end
 end
 
-code/await Green (var Rect rect) -> (var& Rect rct, event& void collided) -> void do
-  var&? Test_Case tst = spawn Test_Case(rect, Color(0x99,0xFF,0x99));
+code/await Green (var Point pst) -> (var& Rect rect, event& void collided) -> void do
+  var&? Test_Case tst = spawn Test_Case(pst, Color(0x99,0xFF,0x99));
   watching tst do
-    rct = &tst.rct;             // bind my public fields to corresponding fields in Test_Case
+    rect = &tst.rect;             // bind my public fields to corresponding fields in Test_Case
     collided = &tst.collided;
     await FOREVER;              // nothing else to do, behave just like Test_Case
   end
 end
 
-code/await Red (var Rect rect) -> (var& Rect rct, event& void collided) -> void do
-  var&? Test_Case tst = spawn Test_Case(rect, Color(0xFF,0x99,0x99));
+code/await Red (var Point pst) -> (var& Rect rect, event& void collided) -> void do
+  var&? Test_Case tst = spawn Test_Case(pst, Color(0xFF,0x99,0x99));
   watching tst do
-    rct = &tst.rct;
+    rect = &tst.rect;
     collided = &tst.collided;
     await FOREVER;
   end
@@ -262,8 +262,8 @@ loop do
 
     par do
       every 40ms do
-        spawn Green(Rect((_rand() % 800) + 400, -240 + _rand() % 480, 40,40)) in gs;
-        spawn Red(Rect((_rand() % 800) + 400, -240 + _rand() % 480, 40,40)) in rs;
+        spawn Green(Point((_rand() % 800) + 400, -240 + _rand() % 480)) in gs;
+        spawn Red(Point((_rand() % 800) + 400, -240 + _rand() % 480)) in rs;
       end
 
     with
@@ -272,7 +272,7 @@ loop do
       every FRAMES_UPDATE do    //*** SDL_DT -> FRAMES_UPDATE
         var&? Green green;
         loop green in gs do
-          if (call Collision(ship.rect, green!.rct)) then
+          if (call Collision(ship.rect, green!.rect)) then
             emit green!.collided;
             emit ship.collided(true);
             emit score.collided_green;
@@ -281,13 +281,13 @@ loop do
             var int num_particles = _rand() % 25 + 10;
             loop i in [0->num_particles[ do
               var int sq = _rand() % 10 + 8;
-              spawn Particle(Rect(green!.rct.x, green!.rct.y, sq, sq), ship.velx, ship.vely, Color(0x99, 0xFF, 0x99)) in ps;
+              spawn Particle(Rect(green!.rect.x, green!.rect.y, sq, sq), ship.velx, ship.vely, Color(0x99, 0xFF, 0x99)) in ps;
             end
           end
         end
         var&? Red red;
         loop red in rs do
-          if (call Collision(ship.rect, red!.rct)) then
+          if (call Collision(ship.rect, red!.rect)) then
             emit red!.collided;
             emit ship.collided(false);
             emit score.collided_red;
@@ -296,7 +296,7 @@ loop do
             var int num_particles = _rand() % 25 + 10;
             loop i in [0->num_particles[ do
               var int sq = _rand() % 10 + 8;
-              spawn Particle(Rect(red!.rct.x, red!.rct.y, sq, sq), ship.velx, ship.vely, Color(0xFF, 0x99, 0x99)) in ps;
+              spawn Particle(Rect(red!.rect.x, red!.rect.y, sq, sq), ship.velx, ship.vely, Color(0xFF, 0x99, 0x99)) in ps;
             end
           end
         end
