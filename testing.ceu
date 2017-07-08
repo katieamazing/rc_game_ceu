@@ -1,7 +1,7 @@
 //*** #include's are no longer necessary
 
 //*** SDL_Rect -> Rect
-code/tight Collision (var Rect r1, var Rect r2) -> bool
+code/tight Collision (var& Rect r1, var& Rect r2) -> bool
 do
   if r1.x+r1.w < r2.x then
     escape false;
@@ -272,7 +272,7 @@ loop do
       every FRAMES_UPDATE do    //*** SDL_DT -> FRAMES_UPDATE
         var&? Green green;
         loop green in gs do
-          if (call Collision(ship.rect, green!.rect)) then
+          if (call Collision(&ship.rect, &green!.rect)) then
             emit green!.collided;
             emit ship.collided(true);
             emit score.collided_green;
@@ -287,7 +287,7 @@ loop do
         end
         var&? Red red;
         loop red in rs do
-          if (call Collision(ship.rect, red!.rect)) then
+          if (call Collision(&ship.rect, &red!.rect)) then
             emit red!.collided;
             emit ship.collided(false);
             emit score.collided_red;
