@@ -18,64 +18,42 @@ do
   escape true;
 end
 
+code/await Key_Is_Down (var int key) -> (var bool is_down) -> FOREVER do
+  is_down = false;
+  loop do
+    var int key1 = await KEY_PRESS   until (key1==key);
+    is_down = true;
+    var int key2 = await KEY_UNPRESS until (key2==key);
+    is_down = false;
+  end
+end
+
 //*** "ren" arguments are no longer necessary
 code/await Ship (var int x, var int y) -> (var Rect rect, var int velx, var int vely, event bool collided) -> FOREVER do
   rect = val Rect(x, y, 48, 60);      //*** TODO: GRAPHICS_GET_BMP_DIMENSIONS
   var bool is_green = true;
   var bool recently_collided = false;
-  var bool right_is_down = false;
-  var bool left_is_down = false;
-  var bool up_is_down = false;
-  var bool down_is_down = false;
+
+  var& Key_Is_Down right = spawn Key_Is_Down(KEY_RIGHT);
+  var& Key_Is_Down left  = spawn Key_Is_Down(KEY_LEFT);
+  var& Key_Is_Down up    = spawn Key_Is_Down(KEY_UP);
+  var& Key_Is_Down down  = spawn Key_Is_Down(KEY_DOWN);
+
   velx = 0;
   vely = 0;
 
   par do
-    var int key;                  //*** payload is now an int
-    every key in KEY_PRESS do     //*** SDL_KEYDOWN -> KEY_PRESS
-      if key == KEY_RIGHT then    //*** _SDLK_* -> KEY_*
-        right_is_down = true;
-      end
-      if key == KEY_LEFT then
-        left_is_down = true;
-      end
-      if key == KEY_UP then
-        up_is_down = true;
-      end
-      if key == KEY_DOWN then
-        down_is_down = true;
-      end
-    end
-
-  with
-    var int key;
-    every key in KEY_UNPRESS do   //*** SDL_KEYUP -> KEY_UNPRESS
-      if key == KEY_RIGHT then
-        right_is_down = false;
-      end
-      if key == KEY_LEFT then
-        left_is_down = false;
-      end
-      if key == KEY_UP then
-        up_is_down = false;
-      end
-      if key == KEY_DOWN then
-        down_is_down = false;
-      end
-    end
-
-  with
     every 50ms do
-      if right_is_down then
+      if right.is_down then
         velx = velx + 1;
       end
-      if left_is_down then
+      if left.is_down then
         velx = velx - 1;
       end
-      if down_is_down then        //*** Y-axis is (un)inverted
+      if down.is_down then        //*** Y-axis is (un)inverted
         vely = vely - 1;
       end
-      if up_is_down then          //*** Y-axis is (un)inverted
+      if up.is_down then          //*** Y-axis is (un)inverted
         vely = vely + 1;
       end
 
