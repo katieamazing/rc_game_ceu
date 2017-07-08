@@ -211,18 +211,7 @@ code/await Score (void) -> (event void collided_green, event void collided_red) 
   end
 end
 
-//*** SDL_Init -> WINDOW_SET_TITLE/SET_SIZE
-emit WINDOW_SET_TITLE("Red/Green Recurse/Center");
-emit WINDOW_SET_SIZE(800,480,800,480);
-
-loop do
-  // show splash screen
-  emit GRAPHICS_DRAW_BMP(0,0, "splash.bmp");        //*** (0,0) is the screen center, x grows to left, y grows to top
-  await KEY_PRESS;
-
-  emit WINDOW_SET_CLEAR_COLOR_RGB(0xFF,0xFF,0xFF);  //*** background color on FPS mode
-  emit FRAMES_SET(yes);                             //*** switch to FPS mode
-
+code/await Game (void) -> void do
   var&? Score score = spawn Score();
 
   watching score do
@@ -272,6 +261,21 @@ loop do
       end
     end
   end
+end
+
+//*** SDL_Init -> WINDOW_SET_TITLE/SET_SIZE
+emit WINDOW_SET_TITLE("Red/Green Recurse/Center");
+emit WINDOW_SET_SIZE(800,480,800,480);
+
+loop do
+  // show splash screen
+  emit GRAPHICS_DRAW_BMP(0,0, "splash.bmp");        //*** (0,0) is the screen center, x grows to left, y grows to top
+  await KEY_PRESS;
+
+  // show game
+  emit WINDOW_SET_CLEAR_COLOR_RGB(0xFF,0xFF,0xFF);  //*** background color on FPS mode
+  emit FRAMES_SET(yes);                             //*** switch to FPS mode
+  await Game();
 
   // show lose screen
   emit FRAMES_SET(no);                      // switch to immediate mode
