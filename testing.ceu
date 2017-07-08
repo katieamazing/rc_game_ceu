@@ -18,7 +18,7 @@ do
   escape true;
 end
 
-code/await Key_Is_Down (var int key) -> (var bool is_down) -> FOREVER do
+code/await Key_Is_Down (var int key) -> (var bool is_down) -> NEVER do
   is_down = false;
   loop do
     var int key1 = await KEY_PRESS   until (key1==key);
@@ -29,7 +29,7 @@ code/await Key_Is_Down (var int key) -> (var bool is_down) -> FOREVER do
 end
 
 //*** "ren" arguments are no longer necessary
-code/await Ship (var int x, var int y) -> (var Rect rect, var int velx, var int vely, event bool collided) -> FOREVER do
+code/await Ship (var int x, var int y) -> (var Rect rect, var int velx, var int vely, event bool collided) -> NEVER do
   rect = val Rect(x, y, 48, 60);      //*** TODO: GRAPHICS_GET_BMP_DIMENSIONS
   var bool is_green = true;
   var bool recently_collided = false;
